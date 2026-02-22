@@ -56,7 +56,10 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
     const formatPresetName = (key: string) =>
         key
             .split("_")
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .map((w) => {
+                if (w.toLowerCase() === "fno") return "F&O";
+                return w.charAt(0).toUpperCase() + w.slice(1);
+            })
             .join(" ");
 
     return (
