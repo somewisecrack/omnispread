@@ -38,33 +38,10 @@ export default function PairDetailModal({ pair, onClose }: PairDetailModalProps)
         });
         chartRef.current = chart;
 
-        // Synthetic mean-reverting spread
-        const days = 252;
-        const now = new Date();
-        const data: { time: string; value: number }[] = [];
-        const upperBand: { time: string; value: number }[] = [];
-        const lowerBand: { time: string; value: number }[] = [];
-        const meanLine: { time: string; value: number }[] = [];
-
-        let spread = 0;
-        const halfLife = pair.half_life;
-        const phi = Math.exp(-Math.log(2) / halfLife);
-        const sigma = 1;
-
-        for (let i = 0; i < days; i++) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - (days - i));
-            const day = date.toISOString().split("T")[0];
-            spread = phi * spread + sigma * (Math.random() - 0.5) * 2 * Math.sqrt(1 - phi * phi);
-            data.push({ time: day, value: spread });
-            const rollingSigma = sigma * Math.sqrt(1 / (2 * Math.log(2) / halfLife));
-            upperBand.push({ time: day, value: 2 * rollingSigma });
-            lowerBand.push({ time: day, value: -2 * rollingSigma });
-            meanLine.push({ time: day, value: 0 });
-        }
-
-        const rollingSigma = sigma * Math.sqrt(1 / (2 * Math.log(2) / halfLife));
-        data[data.length - 1].value = pair.z_score * rollingSigma;
+        const data = pair.historical_z_scores.map(item => ({ time: item.time, value: item.value }));
+        const upperBand = pair.historical_z_scores.map(item => ({ time: item.time, value: 2 }));
+        const lowerBand = pair.historical_z_scores.map(item => ({ time: item.time, value: -2 }));
+        const meanLine = pair.historical_z_scores.map(item => ({ time: item.time, value: 0 }));
 
         chart.addSeries(LineSeries, { color: "#6366f1", lineWidth: 2 }).setData(data);
         chart.addSeries(LineSeries, { color: "#f87171", lineWidth: 1, lineStyle: 2 }).setData(upperBand);
@@ -150,7 +127,7 @@ export default function PairDetailModal({ pair, onClose }: PairDetailModalProps)
                 {/* Chart */}
                 <div style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid var(--color-border)", background: "rgba(10, 10, 15, 0.5)", padding: "10px" }}>
                     <div style={{ display: "flex", gap: "14px", marginBottom: "8px", fontSize: "10px", color: "var(--color-text-muted)" }}>
-                        <span><span style={{ width: "10px", height: "2px", background: "#6366f1", display: "inline-block", verticalAlign: "middle", marginRight: "4px" }} />Spread</span>
+                        <span><span style={{ width: "10px", height: "2px", background: "#6366f1", display: "inline-block", verticalAlign: "middle", marginRight: "4px" }} />Z-Score</span>
                         <span><span style={{ width: "10px", height: "2px", background: "#f87171", display: "inline-block", verticalAlign: "middle", marginRight: "4px" }} />+2σ</span>
                         <span><span style={{ width: "10px", height: "2px", background: "#34d399", display: "inline-block", verticalAlign: "middle", marginRight: "4px" }} />-2σ</span>
                     </div>

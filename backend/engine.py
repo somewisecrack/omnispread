@@ -449,9 +449,18 @@ class OmniSpreadEngine:
         is_profitable_since_extremum = "N/A"
         pnl_since_extremum = 0.0
 
+        historical_z_scores = []
         if not np.isnan(z_display) and hl > 0 and len(spread) >= hl:
             all_z = (spread - mavg) / mstd
             z_window = all_z.iloc[-hl:].dropna()
+            
+            # Format for frontend chart: [{time: "YYYY-MM-DD", value: z}, ...]
+            for idx, val in z_window.items():
+                if math.isfinite(val):
+                    historical_z_scores.append({
+                        "time": idx.strftime("%Y-%m-%d"),
+                        "value": round(float(val), 2)
+                    })
 
             if not z_window.empty:
                 current_z_unrounded = float(all_z.iloc[-1])
@@ -498,6 +507,7 @@ class OmniSpreadEngine:
             "extreme_z_detail": extreme_z_formatted,
             "profitable_since_extreme": is_profitable_since_extremum,
             "pnl_since_extreme": self._safe_float(pnl_since_extremum),
+            "historical_z_scores": historical_z_scores,
         }
 
     # ========================

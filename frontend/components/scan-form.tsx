@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getPresets, type Presets } from "@/lib/api";
 
 interface ScanFormProps {
-    onScan: (tickers: string[], period: string) => void;
+    onScan: (tickers: string[], period: string, startDate?: string, endDate?: string) => void;
     isScanning: boolean;
 }
 
@@ -14,11 +14,14 @@ const PERIODS = [
     { value: "2y", label: "2 Years" },
     { value: "3y", label: "3 Years" },
     { value: "5y", label: "5 Years" },
+    { value: "custom", label: "Custom" },
 ];
 
 export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
     const [tickerInput, setTickerInput] = useState("");
     const [period, setPeriod] = useState("3y");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
     const [presets, setPresets] = useState<Presets>({});
     const [activePreset, setActivePreset] = useState<string | null>(null);
 
@@ -42,7 +45,11 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
             .map((t) => t.trim().toUpperCase())
             .filter(Boolean);
         if (tickers.length >= 2) {
-            onScan(tickers, period);
+            if (period === "custom") {
+                onScan(tickers, period, startDate, endDate);
+            } else {
+                onScan(tickers, period);
+            }
         }
     };
 
@@ -182,6 +189,36 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
                             </button>
                         ))}
                     </div>
+
+                    {/* Custom Date Inputs */}
+                    {period === "custom" && (
+                        <div style={{ display: "flex", gap: "10px", marginTop: "12px", animation: "fadeIn 0.2s" }}>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: "block", fontSize: "10px", color: "var(--color-text-muted)", marginBottom: "4px" }}>Start Date</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    style={{
+                                        width: "100%", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--color-border)",
+                                        background: "rgba(10, 10, 15, 0.6)", color: "var(--color-text-primary)", fontSize: "13px",
+                                    }}
+                                />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: "block", fontSize: "10px", color: "var(--color-text-muted)", marginBottom: "4px" }}>End Date</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    style={{
+                                        width: "100%", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--color-border)",
+                                        background: "rgba(10, 10, 15, 0.6)", color: "var(--color-text-primary)", fontSize: "13px",
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <button

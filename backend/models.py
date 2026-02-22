@@ -6,6 +6,8 @@ class ScanRequest(BaseModel):
     tickers: list[str]
     period: str = "3y"
     interval: str = "1d"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 class PairResult(BaseModel):
@@ -27,6 +29,7 @@ class PairResult(BaseModel):
     extreme_z_detail: str
     profitable_since_extreme: str
     pnl_since_extreme: float
+    historical_z_scores: list[dict] = []
 
 
 class TaskResponse(BaseModel):

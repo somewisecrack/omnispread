@@ -115,6 +115,8 @@ def run_engine(task_id: str, request: ScanRequest):
             tickers=request.tickers,
             period=request.period,
             interval=request.interval,
+            start_date=request.start_date,
+            end_date=request.end_date,
         )
         results = engine.run_scan()
         tasks[task_id]["results"] = results
