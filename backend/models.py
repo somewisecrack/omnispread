@@ -1,0 +1,35 @@
+from pydantic import BaseModel
+from typing import Optional
+
+
+class ScanRequest(BaseModel):
+    tickers: list[str]
+    period: str = "3y"
+    interval: str = "1d"
+
+
+class PairResult(BaseModel):
+    pair: str
+    combo: str
+    method: str
+    price_corr: float
+    z_score: float
+    half_life: int
+    move_to_mean: float
+    exp_return: float
+    unit_price: float
+    hurst: float
+    prob_profit: float
+    prob_profit_low: float
+    prob_profit_high: float
+    same_sector: str
+    extreme_z_in_hl: str
+    extreme_z_detail: str
+    profitable_since_extreme: str
+    pnl_since_extreme: float
+
+
+class TaskResponse(BaseModel):
+    task_id: str
+    status: str
+    results: list[PairResult] = []
