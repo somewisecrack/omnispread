@@ -455,7 +455,7 @@ class OmniSpreadEngine:
             z_window = all_z.iloc[-hl:].dropna()
             
             # Format for frontend chart: [{time: "YYYY-MM-DD", value: z}, ...]
-            for idx, val in z_window.items():
+            for idx, val in all_z.dropna().items():
                 if math.isfinite(val):
                     historical_z_scores.append({
                         "time": idx.strftime("%Y-%m-%d"),
