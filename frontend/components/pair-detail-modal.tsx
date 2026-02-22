@@ -165,7 +165,7 @@ export default function PairDetailModal({ pair, onClose }: PairDetailModalProps)
                     fontSize: "12px", color: pair.z_score > 0 ? "var(--color-accent-red)" : "var(--color-accent-green)",
                     textAlign: "center", fontWeight: 600,
                 }}>
-                    Signal: {pair.z_score > 0 ? "SHORT" : "LONG"} the spread — {pair.z_score > 0 ? "sell" : "buy"} {pair.pair.split("/")[1]}, {pair.z_score > 0 ? "buy" : "sell"} {pair.pair.split("/")[0]}
+                    Signal: {pair.z_score > 0 ? "Sell" : "Buy"} {pair.pair.split("/")[0]} — {pair.z_score > 0 ? "Buy" : "Sell"} {pair.pair.split("/")[1]}
                 </div>
             </div>
         </div>
