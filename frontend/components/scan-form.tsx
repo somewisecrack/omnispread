@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { getPresets, type Presets } from "@/lib/api";
 
 interface ScanFormProps {
@@ -20,8 +22,8 @@ const PERIODS = [
 export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
     const [tickerInput, setTickerInput] = useState("");
     const [period, setPeriod] = useState("3y");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
     const [presets, setPresets] = useState<Presets>({});
     const [activePreset, setActivePreset] = useState<string | null>(null);
 
@@ -46,7 +48,9 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
             .filter(Boolean);
         if (tickers.length >= 2) {
             if (period === "custom") {
-                onScan(tickers, period, startDate, endDate);
+                const startStr = startDate ? startDate.toISOString().split("T")[0] : undefined;
+                const endStr = endDate ? endDate.toISOString().split("T")[0] : undefined;
+                onScan(tickers, period, startStr, endStr);
             } else {
                 onScan(tickers, period);
             }
@@ -196,28 +200,28 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
                     {/* Custom Date Inputs */}
                     {period === "custom" && (
                         <div style={{ display: "flex", gap: "10px", marginTop: "12px", animation: "fadeIn 0.2s" }}>
-                            <div style={{ flex: 1 }}>
+                            <div style={{ flex: 1, position: "relative" }}>
                                 <label style={{ display: "block", fontSize: "10px", color: "var(--color-text-muted)", marginBottom: "4px" }}>Start Date</label>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    style={{
-                                        width: "100%", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--color-border)",
-                                        background: "rgba(10, 10, 15, 0.6)", color: "var(--color-text-primary)", fontSize: "13px",
-                                    }}
+                                <ReactDatePicker
+                                    selected={startDate}
+                                    onChange={(date: Date | null) => setStartDate(date)}
+                                    dateFormat="yyyy-MM-dd"
+                                    placeholderText="YYYY-MM-DD"
+                                    wrapperClassName="w-full"
+                                    className="custom-date-picker"
+                                    popperPlacement="bottom-start"
                                 />
                             </div>
-                            <div style={{ flex: 1 }}>
+                            <div style={{ flex: 1, position: "relative" }}>
                                 <label style={{ display: "block", fontSize: "10px", color: "var(--color-text-muted)", marginBottom: "4px" }}>End Date</label>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                    style={{
-                                        width: "100%", padding: "8px 12px", borderRadius: "8px", border: "1px solid var(--color-border)",
-                                        background: "rgba(10, 10, 15, 0.6)", color: "var(--color-text-primary)", fontSize: "13px",
-                                    }}
+                                <ReactDatePicker
+                                    selected={endDate}
+                                    onChange={(date: Date | null) => setEndDate(date)}
+                                    dateFormat="yyyy-MM-dd"
+                                    placeholderText="YYYY-MM-DD"
+                                    wrapperClassName="w-full"
+                                    className="custom-date-picker"
+                                    popperPlacement="bottom-end"
                                 />
                             </div>
                         </div>
