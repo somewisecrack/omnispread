@@ -53,32 +53,81 @@ class OmniSpreadEngine:
 
     def fetch_data(self):
         logger.info(f"Fetching data for {len(self.tickers)} tickers...")
+        kwargs = {
+            "interval": self.interval,
+            "auto_adjust": False,
+            "progress": False,
+        }
         if self.start_date and self.end_date:
-            df = yf.download(
-                self.tickers, start=self.start_date, end=self.end_date,
-                interval=self.interval, auto_adjust=False, progress=False,
-            )
+            kwargs.update({"start": self.start_date, "end": self.end_date})
         else:
-            df = yf.download(
-                self.tickers, period=self.period, interval=self.interval,
-                auto_adjust=False, progress=False,
-            )
+            kwargs.update({"period": self.period})
 
-        if df.empty:
+        to_fetch = list(self.tickers)
+        data_frames = []
+        
+        import time
+        for attempt in range(3):
+            if not to_fetch:
+                break
+            if attempt > 0:
+                logger.info(f"Retrying {len(to_fetch)} missing tickers (attempt {attempt+1})...")
+                time.sleep(2)
+                
+            try:
+                df = yf.download(to_fetch, **kwargs)
+            except Exception as e:
+                logger.warning(f"yf.download error: {e}")
+                continue
+                
+            if df.empty:
+                continue
+                
+            if len(to_fetch) == 1:
+                if "Adj Close" in df:
+                    adj_close = pd.DataFrame({to_fetch[0]: df["Adj Close"]})
+                else:
+                    adj_close = pd.DataFrame()
+            else:
+                # Since yfinance 0.2.x, multi-ticker passes MultiIndex columns
+                if isinstance(df.columns, pd.MultiIndex):
+                    try:
+                        adj_close = df["Adj Close"]
+                    except KeyError:
+                        logger.warning("'Adj Close' missing in MultiIndex")
+                        adj_close = pd.DataFrame()
+                else:
+                    # In some rare yfinance errors, it falls back
+                    if "Adj Close" in df:
+                        adj_close = pd.DataFrame({to_fetch[0]: df["Adj Close"]})
+                    else:
+                        adj_close = pd.DataFrame()
+
+            if not adj_close.empty:
+                valid = adj_close.dropna(axis=1, how='all').columns.tolist()
+                if valid:
+                    data_frames.append(adj_close[valid])
+                to_fetch = [t for t in to_fetch if t not in valid]
+
+        if not data_frames:
             logger.warning("No data returned from yfinance")
             self.data = pd.DataFrame()
             return []
 
-        if isinstance(df.columns, pd.MultiIndex):
-            self.data = df["Adj Close"].dropna(axis=1, thresh=int(0.9 * len(df)))
-        else:
-            self.data = df[["Adj Close"]].dropna()
-            self.data.columns = self.tickers[:1]
+        # Combine all successful fetches
+        combined = pd.concat(data_frames, axis=1)
 
+        # Clean data: drop tickers with >10% missing data
+        threshold = int(len(combined) * 0.9)
+        combined = combined.dropna(axis=1, thresh=threshold)
+        
+        # Forward/backward fill remaining NAs
+        self.data = combined.ffill().bfill()
+        
         # Preserve original ticker ordering (matches Colab behavior)
         active = [s for s in self.tickers if s in self.data.columns]
         self.data = self.data[active]
-        logger.info(f"Active tickers after cleaning: {len(active)}")
+        logger.info(f"Active tickers after cleaning: {len(active)} / {len(self.tickers)}")
         return active
 
     def fetch_industries(self):
