@@ -1,0 +1,3 @@
+#!/bin/bash
+# OmniSpread.app executable — runs the launch script headlessly
+exec /Users/rahulgirishkumar/PROJECTS/omnispread/launch.sh "$@"
