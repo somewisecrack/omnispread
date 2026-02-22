@@ -314,9 +314,11 @@ class OmniSpreadEngine:
         y_disp = y_sym.replace(".NS", "").replace(".BO", "")
 
         if z > 0:
-            combo_str = f"Sell {qty} of {x_disp} ({px}, {ix})  &  Buy 1 of {y_disp} ({py}, {iy})"
-        else:
+            # Spread (Y - bX) is high -> Short spread -> Sell Y, Buy X
             combo_str = f"Buy {qty} of {x_disp} ({px}, {ix})  &  Sell 1 of {y_disp} ({py}, {iy})"
+        else:
+            # Spread (Y - bX) is low -> Long spread -> Sell X, Buy Y
+            combo_str = f"Sell {qty} of {x_disp} ({px}, {ix})  &  Buy 1 of {y_disp} ({py}, {iy})"
 
         return {
             "x": x_sym, "y": y_sym,
