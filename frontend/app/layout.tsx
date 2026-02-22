@@ -30,6 +30,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body
         className={`${inter.variable} ${jetbrainsMono.variable}`}
+        suppressHydrationWarning
         style={{
           fontFamily: "var(--font-inter), var(--font-sans)",
           minHeight: "100vh",
