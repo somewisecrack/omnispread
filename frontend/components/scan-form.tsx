@@ -7,6 +7,7 @@ import { getPresets, type Presets } from "@/lib/api";
 
 interface ScanFormProps {
     onScan: (tickers: string[], period: string, interval?: string, startDate?: string, endDate?: string) => void;
+    onReset: () => void;
     isScanning: boolean;
 }
 
@@ -20,7 +21,7 @@ const PERIODS = [
     { value: "custom", label: "Custom" },
 ];
 
-export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
+export default function ScanForm({ onScan, onReset, isScanning }: ScanFormProps) {
     const [tickerInput, setTickerInput] = useState("");
     const [period, setPeriod] = useState("3y");
     const [interval, setIntervalVal] = useState("1d");
@@ -55,6 +56,16 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
             setTickerInput(tickers.join(", "));
             setActivePreset(key);
         }
+    };
+
+    const handleReset = () => {
+        setTickerInput("");
+        setPeriod("3y");
+        setIntervalVal("1d");
+        setStartDate(null);
+        setEndDate(null);
+        setActivePreset(null);
+        onReset();
     };
 
     const handleScan = () => {
@@ -289,40 +300,59 @@ export default function ScanForm({ onScan, isScanning }: ScanFormProps) {
                     )}
                 </div>
 
-                <button
-                    onClick={handleScan}
-                    disabled={isScanning || tickerInput.trim().length === 0}
-                    style={{
-                        padding: "12px 32px",
-                        borderRadius: "10px",
-                        border: "none",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        cursor: isScanning ? "not-allowed" : "pointer",
-                        background: isScanning
-                            ? "rgba(99, 102, 241, 0.3)"
-                            : "linear-gradient(135deg, #6366f1, #4f46e5)",
-                        color: "#fff",
-                        transition: "all 0.2s",
-                        opacity: tickerInput.trim().length === 0 ? 0.5 : 1,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        whiteSpace: "nowrap",
-                    }}
-                >
-                    {isScanning && (
-                        <span style={{
-                            width: "16px",
-                            height: "16px",
-                            border: "2px solid rgba(255,255,255,0.3)",
-                            borderTop: "2px solid #fff",
-                            borderRadius: "50%",
-                            display: "inline-block",
-                        }} className="animate-spin" />
-                    )}
-                    {isScanning ? "Scanning..." : "Run Scan"}
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                        onClick={handleReset}
+                        disabled={isScanning}
+                        style={{
+                            padding: "12px 24px",
+                            borderRadius: "10px",
+                            border: "1px solid var(--color-border)",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            cursor: isScanning ? "not-allowed" : "pointer",
+                            background: "transparent",
+                            color: "var(--color-text-secondary)",
+                            transition: "all 0.2s",
+                        }}
+                    >
+                        Reset
+                    </button>
+                    <button
+                        onClick={handleScan}
+                        disabled={isScanning || tickerInput.trim().length === 0}
+                        style={{
+                            padding: "12px 32px",
+                            borderRadius: "10px",
+                            border: "none",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            cursor: isScanning || tickerInput.trim().length === 0 ? "not-allowed" : "pointer",
+                            background: isScanning
+                                ? "rgba(99, 102, 241, 0.3)"
+                                : "linear-gradient(135deg, #6366f1, #4f46e5)",
+                            color: "#fff",
+                            transition: "all 0.2s",
+                            opacity: tickerInput.trim().length === 0 ? 0.5 : 1,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {isScanning && (
+                            <span style={{
+                                width: "16px",
+                                height: "16px",
+                                border: "2px solid rgba(255,255,255,0.3)",
+                                borderTop: "2px solid #fff",
+                                borderRadius: "50%",
+                                display: "inline-block",
+                            }} className="animate-spin" />
+                        )}
+                        {isScanning ? "Scanning..." : "Run Scan"}
+                    </button>
+                </div>
             </div>
         </div>
     );

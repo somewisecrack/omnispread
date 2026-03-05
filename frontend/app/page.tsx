@@ -12,8 +12,17 @@ export default function Home() {
   const [selectedPair, setSelectedPair] = useState<PairResult | null>(null);
   const [scanStatus, setScanStatus] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [currentInterval, setCurrentInterval] = useState<string>("1d");
+
+  const handleReset = () => {
+    setResults([]);
+    setScanStatus("");
+    setError("");
+    setSelectedPair(null);
+  };
 
   const handleScan = async (tickers: string[], period: string, interval?: string, startDate?: string, endDate?: string) => {
+    setCurrentInterval(interval || "1d");
     setIsScanning(true);
     setResults([]);
     setError("");
@@ -99,7 +108,7 @@ export default function Home() {
 
       {/* Scan Form */}
       <section style={{ marginBottom: "32px" }}>
-        <ScanForm onScan={handleScan} isScanning={isScanning} />
+        <ScanForm onScan={handleScan} onReset={handleReset} isScanning={isScanning} />
       </section>
 
       {/* Status */}
@@ -153,6 +162,7 @@ export default function Home() {
         results={results}
         isLoading={isScanning}
         onRowClick={setSelectedPair}
+        interval={currentInterval}
       />
 
       {/* Modal */}
